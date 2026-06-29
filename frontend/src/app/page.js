@@ -1,118 +1,58 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
-import CurriculoManager from './components/CurriculoManager';
-import DashboardGraficos from './components/DashboardGraficos';
+import DashboardFinanceiro from './components/DashboardFinanceiro'; // Novo componente
 import ConselheiroIA from './components/ConselheiroIA';
-import ComparacaoUniversidades from './components/ComparacaoUniversidades';
-import Explorar from './components/Explorar';
-import PerfilPublico from './components/PerfilPublico';
 
 export default function Home() {
-  const [abaAtiva, setAbaAtiva] = useState('perfil');
-  const [perfilSelecionadoId, setPerfilSelecionadoId] = useState(null);
-  const [contaSelecionadaId, setContaSelecionadaId] = useState(null); // <-- NOVO ESTADO
+  const [abaAtiva, setAbaAtiva] = useState('dashboard');
+  const [usuario, setUsuario] = useState(null);
+
+  useEffect(() => {
+    const dados = localStorage.getItem('usuarioLogado');
+    if (dados) setUsuario(JSON.parse(dados));
+  }, []);
 
   const renderizarConteudo = () => {
     switch (abaAtiva) {
-      case 'perfil':
-        return <CurriculoManager />;
-        
-      case 'explorar':
-        // Agora recebemos os dois IDs do clique
-        return <Explorar onVerPerfil={(idPerfil, idConta) => {
-            setPerfilSelecionadoId(idPerfil);
-            setContaSelecionadaId(idConta); // Guarda o ID do framework
-            setAbaAtiva('perfil-publico'); 
-        }} />;
-        
-      case 'perfil-publico':
-        return <PerfilPublico 
-            usuarioId={perfilSelecionadoId} 
-            accountId={contaSelecionadaId} // <-- Repassa o ID para a página
-            onVoltar={() => setAbaAtiva('explorar')}
-        />;
-
-      case 'graficos':
-        return <DashboardGraficos />;
-      case 'comparacao':
-        return <ComparacaoUniversidades />;
+      case 'dashboard':
+        return <DashboardFinanceiro usuario={usuario} />;
       case 'ia':
-        return <ConselheiroIA />;
+        return <ConselheiroIA usuario={usuario} />;
       default:
-        return <CurriculoManager />;
+        return <DashboardFinanceiro usuario={usuario} />;
     }
   };
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f4f7f6' }}>
-      
-      {/* ================= BARRA LATERAL (SIDEBAR) ================= */}
-      <aside style={{ 
-        width: '250px', 
-        backgroundColor: '#1a1c23', 
-        color: '#fff', 
-        display: 'flex', 
-        flexDirection: 'column' 
-      }}>
+      <aside style={{ width: '250px', backgroundColor: '#1a1c23', color: '#fff', display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '20px', fontSize: '22px', fontWeight: 'bold', borderBottom: '1px solid #2d313c', textAlign: 'center' }}>
-          🎓 Academix AI
+          💰 FinSight
         </div>
         
         <nav style={{ display: 'flex', flexDirection: 'column', padding: '20px 0' }}>
-          
-          <button 
-            onClick={() => setAbaAtiva('perfil')}
-            style={estiloBotaoSidebar(abaAtiva === 'perfil')}
-          >
-            👤 Meu Perfil
+          <button onClick={() => setAbaAtiva('dashboard')} style={estiloBotaoSidebar(abaAtiva === 'dashboard')}>
+            📊 Dashboard
           </button>
-
-          <button 
-            onClick={() => setAbaAtiva('explorar')}
-            style={estiloBotaoSidebar(abaAtiva === 'explorar')}
-          >
-            🌍 Explorar Rede
-          </button>
-          
-          <button 
-            onClick={() => setAbaAtiva('graficos')}
-            style={estiloBotaoSidebar(abaAtiva === 'graficos')}
-          >
-            📊 Dados Básicos
-          </button>
-
-          <button 
-            onClick={() => setAbaAtiva('comparacao')}
-            style={estiloBotaoSidebar(abaAtiva === 'comparacao')}
-          >
-            ⚖️ Comparar Instituições
-          </button>
-          
-          <button 
-            onClick={() => setAbaAtiva('ia')}
-            style={estiloBotaoSidebar(abaAtiva === 'ia')}
-          >
+          <button onClick={() => setAbaAtiva('ia')} style={estiloBotaoSidebar(abaAtiva === 'ia')}>
             🤖 Conselheiro IA
           </button>
-
         </nav>
       </aside>
 
-      {/* ================= ÁREA DE CONTEÚDO PRINCIPAL ================= */}
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        
         <Navbar /> 
-        
         <div style={{ padding: '30px', overflowY: 'auto' }}>
           {renderizarConteudo()}
         </div>
-        
       </main>
     </div>
   );
 }
+
+// O estiloBotaoSidebar permanece o mesmo
 
 const estiloBotaoSidebar = (ativo) => ({
   padding: '15px 25px',

@@ -2,33 +2,24 @@
 
 import { useState, useEffect } from 'react';
 
-export default function ConselheiroIA() {
-  const [usuario, setUsuario] = useState(null);
+export default function ConselheiroIA({ usuario }) {
   const [carregando, setCarregando] = useState(false);
   
   const [mensagem, setMensagem] = useState('');
   const [arquivoPdf, setArquivoPdf] = useState(null);
   
   const [historico, setHistorico] = useState([
-    { role: 'assistant', content: 'Olá! Sou o Conselheiro do Academix AI. Quer um conselho geral sobre sua trajetória ou prefere me anexar um edital para analisarmos as suas chances de aprovação?' }
+    { role: 'assistant', content: 'Olá! Sou o Analista IA do FinSight. Quer uma avaliação geral da sua carteira ou prefere me anexar um relatório de mercado/fato relevante para analisarmos?' }
   ]);
-
-  useEffect(() => {
-    const dadosSalvos = localStorage.getItem('usuarioLogado');
-    if (dadosSalvos) {
-      setUsuario(JSON.parse(dadosSalvos));
-    }
-  }, []);
 
   const solicitarConselhoGeral = async () => {
     if (!usuario) return;
     
     setCarregando(true);
-    const novaMensagemUsuario = { role: 'user', content: 'Analise meu currículo e minha trajetória e me dê um conselho de próximos passos para o mestrado.' };
+    const novaMensagemUsuario = { role: 'user', content: 'Analise minha carteira de investimentos e meu histórico de aportes, e me dê um parecer focado em diversificação e gestão de risco.' };
     setHistorico(prev => [...prev, novaMensagemUsuario]);
 
     try {
-      // Como a IA agora pega o currículo e os marcos automaticamente via Template Method, só precisamos bater no endpoint
       const res = await fetch(`http://localhost:8080/api/ai/conselho/rapido/${usuario.account.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -66,7 +57,6 @@ export default function ConselheiroIA() {
         formData.append('file', arquivoPdf);
       }
 
-      // Rota unificada para o AiTaskTemplate
       const res = await fetch(`http://localhost:8080/api/ai/conselho/${usuario.account.id}`, {
         method: 'POST',
         body: formData 
@@ -83,14 +73,14 @@ export default function ConselheiroIA() {
   };
 
   if (!usuario) {
-    return <div style={{ color: '#000', padding: '20px' }}>Faça login para acessar a IA.</div>;
+    return <div style={{ color: '#000', padding: '20px' }}>Faça login para acessar a análise avançada.</div>;
   }
 
   return (
-    <div style={{ padding: '30px', backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #ddd', display: 'flex', flexDirection: 'column', height: '80vh' }}>
+    <div style={{ padding: '30px', backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #ddd', display: 'flex', flexDirection: 'column', height: '80vh', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
       
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2 style={{ color: '#0070f3', margin: 0 }}>🤖 Conselheiro Acadêmico (IA)</h2>
+        <h2 style={{ color: '#0f766e', margin: 0 }}>🤖 Analista Financeiro (IA)</h2>
         
         <button 
           onClick={solicitarConselhoGeral} 
@@ -100,7 +90,7 @@ export default function ConselheiroIA() {
             border: 'none', borderRadius: '5px', cursor: carregando ? 'not-allowed' : 'pointer', fontWeight: 'bold'
           }}
         >
-          ✨ Conselho Rápido
+          ✨ Parecer da Carteira
         </button>
       </div>
 
@@ -108,7 +98,7 @@ export default function ConselheiroIA() {
         {historico.map((msg, index) => (
           <div key={index} style={{
             alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-            backgroundColor: msg.role === 'user' ? '#0070f3' : '#fff',
+            backgroundColor: msg.role === 'user' ? '#0f766e' : '#fff',
             color: msg.role === 'user' ? '#fff' : '#333',
             padding: '15px', borderRadius: '8px', maxWidth: '80%',
             boxShadow: '0 2px 5px rgba(0,0,0,0.05)', whiteSpace: 'pre-wrap', lineHeight: '1.5'
@@ -116,12 +106,12 @@ export default function ConselheiroIA() {
             {msg.content}
           </div>
         ))}
-        {carregando && <div style={{ alignSelf: 'flex-start', color: '#888', fontStyle: 'italic' }}>A IA está lendo seu histórico e pensando...</div>}
+        {carregando && <div style={{ alignSelf: 'flex-start', color: '#888', fontStyle: 'italic' }}>A IA está avaliando seus ativos...</div>}
       </div>
 
       <form onSubmit={enviarMensagem} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
         
-        <label style={{ cursor: 'pointer', padding: '10px', backgroundColor: arquivoPdf ? '#e0f2fe' : '#f1f5f9', borderRadius: '5px', border: '1px solid #cbd5e1' }}>
+        <label style={{ cursor: 'pointer', padding: '10px', backgroundColor: arquivoPdf ? '#d1fae5' : '#f1f5f9', borderRadius: '5px', border: '1px solid #cbd5e1', color: '#333' }}>
           📄 {arquivoPdf ? arquivoPdf.name : 'Anexar Documento'}
           <input 
             type="file" 
@@ -135,22 +125,16 @@ export default function ConselheiroIA() {
           type="text" 
           value={mensagem} 
           onChange={(e) => setMensagem(e.target.value)} 
-          placeholder="Digite sua dúvida ou peça análise do documento anexado..." 
+          placeholder="Digite sua dúvida ou peça análise de um relatório financeiro..." 
           style={{ 
-            flex: 1, 
-            padding: '12px', 
-            border: '1px solid #ccc', 
-            borderRadius: '5px', 
-            outline: 'none',
-            color: '#333',
-            backgroundColor: '#fff'
+            flex: 1, padding: '12px', border: '1px solid #ccc', borderRadius: '5px', outline: 'none', color: '#333', backgroundColor: '#fff'
           }}
         />
         
         <button 
           type="submit" 
           disabled={carregando || (!mensagem.trim() && !arquivoPdf)}
-          style={{ padding: '12px 24px', backgroundColor: '#0070f3', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}
+          style={{ padding: '12px 24px', backgroundColor: '#0f766e', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}
         >
           Enviar
         </button>
